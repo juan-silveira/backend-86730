@@ -85,10 +85,17 @@ Este guia demonstra como testar todas as funcionalidades da API usando uma ferra
   }
   ```
 
-### 6. Incrementar quantidade de produto no carrinho (+1)
+### 6. Atualizar quantidade de produto no carrinho
 - **Método:** `PUT`
 - **URL:** `http://localhost:8080/api/carts/1/product/1`
-- **Observação:** Incrementa automaticamente +1 na quantidade do produto
+- **Headers:**
+  - `Content-Type`: `application/json`
+- **Body** (selecione `raw` e `JSON`):
+  ```json
+  {
+    "quantity": 5
+  }
+  ```
 
 ### 7. Remover produto do carrinho
 - **Método:** `DELETE`
@@ -136,10 +143,15 @@ Para executar um fluxo contínuo, você pode usar variáveis de ambiente no Post
     { "quantity": 1 }
     ```
 
-### 3. Incrementar quantidade de um produto
+### 3. Atualizar quantidade de um produto
 - **Método:** `PUT`
 - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/1`
-- **Observação:** Aumenta +1 na quantidade do Samsung Galaxy S24
+- **Headers:** `Content-Type`: `application/json`
+- **Body** (raw/JSON):
+  ```json
+  { "quantity": 3 }
+  ```
+- **Observação:** Define a quantidade do Samsung Galaxy S24 para 3 unidades
 
 ### 4. Visualizar carrinho atualizado
 - **Método:** `GET`

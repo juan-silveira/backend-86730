@@ -110,8 +110,13 @@ router.delete('/:cid/product/:pid', async (req, res) => {
 router.put('/:cid/product/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
+        const { quantity } = req.body;
         
-        const updatedCart = await cartManager.updateProductQuantity(cid, pid);
+        if (!quantity || quantity < 1) {
+            return res.status(400).json({ error: 'Quantidade deve ser maior que 0' });
+        }
+        
+        const updatedCart = await cartManager.updateProductQuantity(cid, pid, quantity);
         
         res.json({
             message: 'Quantidade atualizada com sucesso',

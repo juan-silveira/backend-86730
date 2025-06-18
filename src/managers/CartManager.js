@@ -106,7 +106,7 @@ class CartManager {
         return cart;
     }
 
-    async updateProductQuantity(cartId, productId) {
+    async updateProductQuantity(cartId, productId, quantity) {
         const carts = await this.getCarts();
         const cartIndex = carts.findIndex(cart => cart.id == cartId); // Comparação flexível
         
@@ -121,7 +121,7 @@ class CartManager {
             throw new Error('Produto não encontrado no carrinho');
         }
 
-        cart.products[productIndex].quantity = Number(cart.products[productIndex].quantity + 1);
+        cart.products[productIndex].quantity = Number(quantity);
         
         await this.saveCarts(carts);
         return cart;

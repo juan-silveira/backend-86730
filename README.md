@@ -118,12 +118,17 @@ src/
   }
   ```
 
-#### Incrementar quantidade do produto no carrinho (+1)
+#### Atualizar quantidade do produto no carrinho
 - **PUT** `/api/carts/:cid/product/:pid`
 - **Parâmetros**:
     - `cid` - ID do carrinho
     - `pid` - ID do produto
-- **Observação**: Incrementa automaticamente +1 na quantidade do produto
+- **Body**:
+  ```json
+  {
+    "quantity": 5
+  }
+  ```
 
 #### Remover produto do carrinho
 - **DELETE** `/api/carts/:cid/product/:pid`
