@@ -94,6 +94,10 @@ src/
 
 ### Carrinhos
 
+#### Listar todos os carrinhos
+- **GET** `/api/carts/`
+- **Resposta**: Array com todos os carrinhos
+
 #### Criar novo carrinho
 - **POST** `/api/carts/`
 - **Resposta**: Novo carrinho criado
@@ -114,23 +118,23 @@ src/
   }
   ```
 
+#### Incrementar quantidade do produto no carrinho (+1)
+- **PUT** `/api/carts/:cid/product/:pid`
+- **Parâmetros**:
+    - `cid` - ID do carrinho
+    - `pid` - ID do produto
+- **Observação**: Incrementa automaticamente +1 na quantidade do produto
+
 #### Remover produto do carrinho
 - **DELETE** `/api/carts/:cid/product/:pid`
 - **Parâmetros**:
     - `cid` - ID do carrinho
     - `pid` - ID do produto
 
-#### Atualizar quantidade do produto no carrinho
-- **PUT** `/api/carts/:cid/product/:pid`
-- **Parâmetros**:
-    - `cid` - ID do carrinho
-    - `pid` - ID do produto
-- **Body**:
-  ```json
-  {
-    "quantity": 5
-  }
-  ```
+#### Deletar carrinho vazio
+- **DELETE** `/api/carts/:cid`
+- **Parâmetros**: `cid` - ID do carrinho
+- **Observação**: Só funciona se o carrinho estiver vazio (sem produtos)
 
 ## 🧪 Testando a API com Postman/Insomnia
 
@@ -201,6 +205,8 @@ O sistema já vem com 10 produtos de exemplo:
 - Verificação de existência do carrinho e produto
 - Controle de estoque ao adicionar produtos
 - Incremento automático da quantidade para produtos existentes
+- Validação de produtos existentes no carrinho antes da remoção
+- Carrinho só pode ser deletado se estiver vazio (sem produtos)
 
 ## 🐛 Tratamento de Erros
 
