@@ -217,13 +217,9 @@ A API possui tratamento de erros abrangente:
 
 ## 🚀 Próximos Passos
 
-Para expandir a aplicação, considere implementar:
-- Autenticação e autorização
-- Validação com middlewares
-- Logs estruturados
-- Testes automatizados
-- Banco de dados (MongoDB, PostgreSQL)
-- Documentação com Swagger
+Para expandir a aplicação, vamos implementar:
+- Entrega 2
+- Entrega Final
 
 ## 📝 Licença
 
