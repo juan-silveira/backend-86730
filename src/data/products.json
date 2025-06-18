@@ -1,0 +1,139 @@
+[
+  {
+    "id": 1,
+    "title": "Smartphone Samsung Galaxy S24",
+    "description": "Smartphone Android com 128GB de armazenamento, tela de 6.1 polegadas e câmera tripla de 50MP",
+    "code": "SMART001",
+    "price": 2999.99,
+    "status": true,
+    "stock": 25,
+    "category": "smartphones",
+    "thumbnails": [
+      "samsung_s24_front.jpg",
+      "samsung_s24_back.jpg"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Notebook Dell Inspiron 15",
+    "description": "Notebook com Intel Core i5, 8GB RAM, SSD 256GB, tela 15.6 polegadas Full HD",
+    "code": "NOTE001",
+    "price": 3599.9,
+    "status": true,
+    "stock": 15,
+    "category": "notebooks",
+    "thumbnails": [
+      "dell_inspiron_15.jpg"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Fone de Ouvido Sony WH-1000XM5",
+    "description": "Fone de ouvido wireless com cancelamento de ruído ativo e bateria de 30 horas",
+    "code": "FONE001",
+    "price": 1299.99,
+    "status": true,
+    "stock": 40,
+    "category": "audio",
+    "thumbnails": [
+      "sony_wh1000xm5_black.jpg",
+      "sony_wh1000xm5_silver.jpg"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Smart TV LG 55 4K UHD",
+    "description": "Smart TV LED 55 polegadas com resolução 4K UHD, WebOS e HDR10",
+    "code": "TV001",
+    "price": 2499,
+    "status": true,
+    "stock": 8,
+    "category": "televisores",
+    "thumbnails": [
+      "lg_55_4k_front.jpg",
+      "lg_55_4k_side.jpg"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Mouse Gamer Logitech G Pro X",
+    "description": "Mouse gamer sem fio com sensor HERO 25K, 25.600 DPI e bateria de 70 horas",
+    "code": "MOUSE001",
+    "price": 299.9,
+    "status": true,
+    "stock": 60,
+    "category": "perifericos",
+    "thumbnails": [
+      "logitech_gpro_x.jpg"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Tablet iPad Air 5ª geração",
+    "description": "Tablet Apple iPad Air com chip M1, tela Liquid Retina de 10.9 polegadas, 64GB",
+    "code": "TAB001",
+    "price": 4199,
+    "status": true,
+    "stock": 12,
+    "category": "tablets",
+    "thumbnails": [
+      "ipad_air_blue.jpg",
+      "ipad_air_space_gray.jpg"
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Teclado Mecânico Keychron K2",
+    "description": "Teclado mecânico sem fio, layout 75%, switches Gateron Blue, iluminação RGB",
+    "code": "TEC001",
+    "price": 459.99,
+    "status": true,
+    "stock": 35,
+    "category": "perifericos",
+    "thumbnails": [
+      "keychron_k2_rgb.jpg"
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Câmera DSLR Canon EOS Rebel T7",
+    "description": "Câmera DSLR de 24.1MP com lente EF-S 18-55mm, vídeo Full HD e Wi-Fi",
+    "code": "CAM001",
+    "price": 2199,
+    "status": true,
+    "stock": 6,
+    "category": "cameras",
+    "thumbnails": [
+      "canon_t7_kit.jpg",
+      "canon_t7_body.jpg"
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Smartwatch Apple Watch Series 9",
+    "description": "Relógio inteligente com GPS, tela Always-On Retina, resistente à água",
+    "code": "WATCH001",
+    "price": 1999,
+    "status": true,
+    "stock": 20,
+    "category": "wearables",
+    "thumbnails": [
+      "apple_watch_s9_pink.jpg",
+      "apple_watch_s9_midnight.jpg"
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Console PlayStation 5",
+    "description": "Console de videogame PS5 com SSD ultra-rápido, áudio 3D e controle DualSense",
+    "code": "CONSOLE001",
+    "price": 3999.99,
+    "status": false,
+    "stock": 1,
+    "category": "videogames",
+    "thumbnails": [
+      "ps5_console.jpg",
+      "ps5_dualsense.jpg"
+    ]
+  }
+]
