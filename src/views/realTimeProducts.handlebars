@@ -1,0 +1,214 @@
+<main>
+    <h1>Produtos em Tempo Real</h1>
+
+    <h2 class="mb-3">Adicionar Novo Produto</h2>
+    <form id="create-product-form" class="row g-3 p-3 pt-0 border rounded bg-light">
+
+        <div class="col-md-6 col-lg-3">
+            <label for="title" class="form-label">Título</label>
+            <input id="title" class="form-control" type="text" name="title" placeholder="Ex: Smartphone XYZ" required>
+        </div>
+
+        <div class="col-md-6 col-lg-9">
+            <label for="description" class="form-label">Descrição</label>
+            <input id="description" class="form-control" type="text" name="description"
+                placeholder="Ex: Tela de 6.5 polegadas..." required>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label for="code" class="form-label">Código Único</label>
+            <input id="code" class="form-control" type="text" name="code" placeholder="Ex: PROD-001" required>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label for="price" class="form-label">Preço</label>
+            <input id="price" class="form-control" type="number" name="price" placeholder="Ex: 1299.99" required
+                step="0.01">
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label for="stock" class="form-label">Estoque</label>
+            <input id="stock" class="form-control" type="number" name="stock" placeholder="Ex: 50" required>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <label for="category" class="form-label">Categoria</label>
+            <input id="category" class="form-control" type="text" name="category" placeholder="Ex: Eletrônicos"
+                required>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100">Adicionar Produto</button>
+        </div>
+
+    </form>
+    <hr>
+    <h2 class="mb-3">Deletar Produto</h2>
+    <form id="delete-product-form" class="row row-cols-lg-auto g-3 align-items-center p-3 pt-0 border rounded bg-light">
+        <div class="col-12">
+            <input class="form-control" type="number" name="id" placeholder="ID do Produto" required>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-warning w-100" type="submit">Deletar Produto</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <h2 class="mb-3">Lista de Produtos Atuais</h2>
+    <div id="products-list" class="row row-cols-lg-auto g-3 p-3 pt-0 border rounded bg-secondary">
+        {{#if products.length}}
+        {{#each products}}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6>
+                        <span>ID: </span>
+                        <span class="badge text-bg-dark fs-6">{{this.id}}</span>
+                    </h6>
+                    <h6>{{this.title}}</h6>
+                </div>
+                <div class="card-body">
+                    <p>{{this.description}}</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div class="d-flex flex-column">
+                        <strong>Estoque:</strong>
+                        <div class="badge bg-primary">{{this.stock}}</div>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <strong>Preço:</strong>
+                        <div class="badge bg-success">R$ {{this.price}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+        {{else}}
+        <p>Nenhum produto para exibir.</p>
+        {{/if}}
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+    crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const socket = io();
+
+    // Pré-configuração do Toast com SweetAlert2
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    const productsList = document.getElementById('products-list');
+    const createForm = document.getElementById('create-product-form');
+    const deleteForm = document.getElementById('delete-product-form');
+
+    // Função para renderizar a lista de produtos (sem alterações)
+    const renderProducts = (products) => {
+        productsList.innerHTML = '';
+        if (products.length > 0) {
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                // Usando as classes de card do Bootstrap para um visual melhor
+                productCard.className = 'card mb-3';
+                productCard.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">${product.title} (ID: ${product.id})</h5>
+                    <p class="card-text">${product.description}</p>
+                    <p class="card-text"><strong>Preço:</strong> R$ ${product.price}</p>
+                    <p class="card-text"><small class="text-muted">Estoque: ${product.stock}</small></p>
+                </div>
+            `;
+                productsList.appendChild(productCard);
+            });
+        } else {
+            productsList.innerHTML = '<p>Nenhum produto para exibir.</p>';
+        }
+    };
+
+    // Listener para o formulário de criação
+    createForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(createForm);
+        const productData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            code: formData.get('code'),
+            price: Number(formData.get('price')),
+            stock: Number(formData.get('stock')),
+            category: formData.get('category'),
+            status: true,
+            thumbnails: []
+        };
+
+        socket.emit('createProduct', productData);
+
+        // Dispara o toast de sucesso!
+        Toast.fire({
+            icon: 'success',
+            title: 'Produto adicionado com sucesso!'
+        });
+
+        createForm.reset();
+    });
+
+    // Listener para o formulário de deleção
+    deleteForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const productId = document.querySelector('#delete-product-form input[name="id"]').value;
+        if (!productId) return;
+
+        // Pergunta ao usuário se ele tem certeza
+        Swal.fire({
+            title: 'Você tem certeza que quer excluir o produto?',
+            text: "Você não poderá reverter esta ação!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            // Se o usuário confirmar...
+            if (result.isConfirmed) {
+                socket.emit('deleteProduct', Number(productId));
+
+                //Dispara o toast de sucesso!
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Produto deletado com sucesso!'
+                });
+
+                deleteForm.reset();
+            }
+        });
+    });
+
+    // Listener para receber a lista de produtos atualizada
+    socket.on('updateProducts', (products) => {
+        renderProducts(products);
+    });
+
+    // Listener para mensagens de erro
+    socket.on('error', (error) => {
+        //Mostra o erro em um pop-up mais elegante
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message,
+        });
+    });
+</script>

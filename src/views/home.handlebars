@@ -1,0 +1,31 @@
+<main class="container">
+    <h1 class="mb-3">Lista de Produtos</h1>
+    <div class="row">
+        {{#if products.length}}
+        {{#each products}}
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header pt-3">
+                    <h6>{{this.title}}</h6>
+                </div>
+                <div class="card-body">
+                    <p>{{this.description}}</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div class="d-flex flex-column">
+                        <strong>Estoque:</strong>
+                        <div class="badge bg-primary">{{this.stock}}</div>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <strong>Preço:</strong>
+                        <div class="badge bg-success">R$ {{this.price}}</div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+        {{else}}
+        <p>Nenhum produto encontrado.</p>
+        {{/if}}
+    </div>
+</main>
