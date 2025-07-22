@@ -1,0 +1,167 @@
+<main class="container">
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <a href="/products" class="btn btn-outline-secondary">
+                ← Voltar para produtos
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        {{!-- Para implementar no futuro, adicionar a imagem do produto --}}
+        {{!-- <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    {{#if product.thumbnails.length}}
+                    <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {{#each product.thumbnails}}
+                            <div class="carousel-item {{#if @first}}active{{/if}}">
+                                <img src="/images/{{this}}" class="d-block w-100" alt="{{../product.title}}" style="height: 300px; object-fit: cover;">
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{#if (gt product.thumbnails.length 1)}}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                        {{/if}}
+                    </div>
+                    {{else}}
+                    <div class="placeholder-image d-flex align-items-center justify-content-center bg-light" style="height: 300px;">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </div> --}}
+
+        <div class="offset-3 col-6">
+            <h1>{{product.title}}</h1>
+            <p class="text-muted mb-3">Código: {{product.code}}</p>
+            
+            <div class="mb-3">
+                <span class="badge {{#if product.status}}bg-success{{else}}bg-danger{{/if}} fs-6">
+                    {{#if product.status}}Disponível{{else}}Indisponível{{/if}}
+                </span>
+                <span class="badge bg-info fs-6 ms-2">{{product.category}}</span>
+            </div>
+
+            <p class="lead">{{product.description}}</p>
+
+            <div class="row mb-4">
+                <div class="col-6">
+                    <h3 class="text-success">R$ {{product.price}}</h3>
+                </div>
+                <div class="col-6">
+                    <p class="mb-0"><strong>Estoque:</strong></p>
+                    <span class="badge bg-primary fs-6">{{product.stock}} unidades</span>
+                </div>
+            </div>
+
+            {{#if product.status}}
+            {{#if (gt product.stock 0)}}
+            <div class="mb-4">
+                <div class="row">
+                    <div class="col-4">
+                        <label for="quantity" class="form-label">Quantidade:</label>
+                        <input type="number" id="quantity" class="form-control" value="1" min="1" max="{{product.stock}}">
+                    </div>
+                    <div class="col-8 d-flex align-items-end">
+                        <button class="btn btn-success btn-lg w-100" 
+                            onclick="addToCartWithQuantity('{{product._id}}')">
+                            <i class="fas fa-shopping-cart"></i> Adicionar ao Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {{else}}
+            <div class="alert alert-warning">
+                <strong>Produto em falta!</strong> Este item está temporariamente indisponível.
+            </div>
+            {{/if}}
+            {{else}}
+            <div class="alert alert-danger">
+                <strong>Produto indisponível!</strong> Este item não está mais à venda.
+            </div>
+            {{/if}}
+
+            <div class="mt-4">
+                <h5>Informações Técnicas</h5>
+                <ul class="list-unstyled">
+                    <li><strong>ID:</strong> {{product._id}}</li>
+                    <li><strong>Categoria:</strong> {{product.category}}</li>
+                    <li><strong>Código:</strong> {{product.code}}</li>
+                    {{#if product.createdAt}}
+                    <li><strong>Adicionado em:</strong> {{formatDate product.createdAt}}</li>
+                    {{/if}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
+
+async function addToCartWithQuantity(productId) {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    let cartId = localStorage.getItem('cartId');
+    
+    if (!cartId) {
+        try {
+            const response = await fetch('/api/carts', { method: 'POST' });
+            const data = await response.json();
+            cartId = data.cart._id;
+            localStorage.setItem('cartId', cartId);
+        } catch (error) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Erro ao criar carrinho'
+            });
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            Toast.fire({
+                icon: 'success',
+                title: `${quantity} produto(s) adicionado(s) ao carrinho!`
+            });
+        } else {
+            Toast.fire({
+                icon: 'error',
+                title: data.error || 'Erro ao adicionar produto'
+            });
+        }
+    } catch (error) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Erro ao conectar com o servidor'
+        });
+    }
+}
+</script> 

@@ -7,6 +7,7 @@
             <div class="card h-100">
                 <div class="card-header pt-3">
                     <h6>{{this.title}}</h6>
+                    <small class="text-muted">{{this.category}}</small>
                 </div>
                 <div class="card-body">
                     <p>{{this.description}}</p>
@@ -19,7 +20,20 @@
                     <div class="d-flex flex-column">
                         <strong>Preço:</strong>
                         <div class="badge bg-success">R$ {{this.price}}</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="/products/{{this._id}}" class="btn btn-outline-primary btn-sm w-100">Ver Detalhes</a>
                         </div>
+                        <div class="col-6">
+                            <button class="btn btn-success btn-sm w-100" 
+                                onclick="addToCart('{{this._id}}')">
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -28,4 +42,69 @@
         <p>Nenhum produto encontrado.</p>
         {{/if}}
     </div>
+
+    <div class="text-center mt-4">
+        <a href="/products" class="btn btn-primary btn-lg">Ver Todos os Produtos</a>
+    </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
+
+async function addToCart(productId) {
+    let cartId = localStorage.getItem('cartId');
+    
+    if (!cartId) {
+        try {
+            const response = await fetch('/api/carts', { method: 'POST' });
+            const data = await response.json();
+            cartId = data.cart._id;
+            localStorage.setItem('cartId', cartId);
+        } catch (error) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Erro ao criar carrinho'
+            });
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            Toast.fire({
+                icon: 'success',
+                title: 'Produto adicionado ao carrinho!'
+            });
+        } else {
+            Toast.fire({
+                icon: 'error',
+                title: data.error || 'Erro ao adicionar produto'
+            });
+        }
+    } catch (error) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Erro ao conectar com o servidor'
+        });
+    }
+}
+</script>
