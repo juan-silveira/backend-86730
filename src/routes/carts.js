@@ -6,7 +6,6 @@ const router = express.Router();
 const cartManager = new CartManager();
 const productManager = new ProductManager();
 
-// GET / - Listar todos os carrinhos
 router.get('/', async (req, res) => {
     try {
         const carts = await cartManager.getCarts();
@@ -16,7 +15,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST / - Criar novo carrinho
 router.post('/', async (req, res) => {
     try {
         const newCart = await cartManager.createCart();
@@ -30,7 +28,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /:cid - Listar produtos do carrinho
 router.get('/:cid', async (req, res) => {
     try {
         const { cid } = req.params;
@@ -46,25 +43,21 @@ router.get('/:cid', async (req, res) => {
     }
 });
 
-// POST /:cid/product/:pid - Adicionar produto ao carrinho
 router.post('/:cid/product/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity = 1 } = req.body;
         
-        // Verifica se o carrinho existe
         const cart = await cartManager.getCartById(cid);
         if (!cart) {
             return res.status(404).json({ error: 'Carrinho não encontrado' });
         }
         
-        // Verifica se o produto existe
         const product = await productManager.getProductById(pid);
         if (!product) {
             return res.status(404).json({ error: 'Produto não encontrado' });
         }
         
-        // Verifica se há estoque suficiente
         if (product.stock < quantity) {
             return res.status(400).json({ error: 'Estoque insuficiente' });
         }
@@ -84,8 +77,7 @@ router.post('/:cid/product/:pid', async (req, res) => {
     }
 });
 
-// DELETE /:cid/product/:pid - Remover produto do carrinho
-router.delete('/:cid/product/:pid', async (req, res) => {
+router.delete('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         
@@ -106,8 +98,37 @@ router.delete('/:cid/product/:pid', async (req, res) => {
     }
 });
 
-// PUT /:cid/product/:pid - Atualizar quantidade do produto no carrinho
-router.put('/:cid/product/:pid', async (req, res) => {
+router.put('/:cid', async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const { products } = req.body;
+        
+        if (!Array.isArray(products)) {
+            return res.status(400).json({ error: 'Products deve ser um array' });
+        }
+        
+        for (const item of products) {
+            if (!item.product || !item.quantity) {
+                return res.status(400).json({ error: 'Cada item deve ter product e quantity' });
+            }
+        }
+        
+        const updatedCart = await cartManager.updateCart(cid, products);
+        
+        res.json({
+            message: 'Carrinho atualizado com sucesso',
+            cart: updatedCart
+        });
+    } catch (error) {
+        if (error.message.includes('não encontrado')) {
+            res.status(404).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Erro interno do servidor' });
+        }
+    }
+});
+
+router.put('/:cid/products/:pid', async (req, res) => {
     try {
         const { cid, pid } = req.params;
         const { quantity } = req.body;
@@ -131,22 +152,19 @@ router.put('/:cid/product/:pid', async (req, res) => {
     }
 });
 
-// DELETE /:cid - Deletar carrinho vazio
 router.delete('/:cid', async (req, res) => {
     try {
         const { cid } = req.params;
         
-        const deletedCart = await cartManager.deleteCart(cid);
+        const clearedCart = await cartManager.clearCart(cid);
         
         res.json({
-            message: 'Carrinho deletado com sucesso',
-            cart: deletedCart
+            message: 'Todos os produtos foram removidos do carrinho',
+            cart: clearedCart
         });
     } catch (error) {
-        if (error.message.includes('Carrinho')) {
+        if (error.message.includes('Carrinho não encontrado')) {
             res.status(404).json({ error: error.message });
-        } else if (error.message.includes('Não')) {
-            res.status(400).json({ error: error.message });
         } else {
             res.status(500).json({ error: 'Erro interno do servidor' });
         }

@@ -1,237 +1,447 @@
-# Exemplos de Uso da API com Postman/Insomnia
-
-Este guia demonstra como testar todas as funcionalidades da API usando uma ferramenta de cliente de API visual como Postman ou Insomnia.
+# API Examples - MongoDB Edition
 
 ## Produtos
 
-### 1. Listar todos os produtos
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/products`
+### 1. Listar todos os produtos (com paginação)
+```http
+GET /api/products
+```
+**Resposta:**
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "65f4b1234567890abcdef123",
+      "title": "Smartphone Samsung Galaxy S24",
+      "description": "Smartphone Android com 128GB de armazenamento",
+      "code": "SMART001",
+      "price": 2999.99,
+      "status": true,
+      "stock": 25,
+      "category": "smartphones",
+      "thumbnails": ["samsung_s24_front.jpg"],
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z"
+    }
+  ],
+  "totalPages": 5,
+  "prevPage": null,
+  "nextPage": 2,
+  "page": 1,
+  "hasPrevPage": false,
+  "hasNextPage": true,
+  "prevLink": null,
+  "nextLink": "/api/products?page=2&limit=10"
+}
+```
 
-### 2. Buscar produto por ID
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/products/1`
+### 2. Listar produtos com filtros e paginação
+```http
+GET /api/products?limit=5&page=1&sort=asc&query=smartphones
+```
+**Resposta:**
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "65f4b1234567890abcdef123",
+      "title": "Smartphone Samsung Galaxy S24",
+      "price": 2999.99,
+      "category": "smartphones"
+    }
+  ],
+  "totalPages": 2,
+  "page": 1,
+  "hasPrevPage": false,
+  "hasNextPage": true,
+  "prevLink": null,
+  "nextLink": "/api/products?page=2&limit=5&sort=asc&query=smartphones"
+}
+```
 
-### 3. Criar novo produto
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/products`
-- **Headers:**
-  - `Content-Type`: `application/json`
-- **Body** (selecione `raw` e `JSON`):
-  ```json
-  {
-    "title": "Smartphone iPhone 15",
-    "description": "iPhone 15 com 128GB de armazenamento",
-    "code": "IPHONE001",
-    "price": 4999.99,
-    "stock": 30,
-    "category": "smartphones",
-    "thumbnails": ["iphone15_front.jpg", "iphone15_back.jpg"]
+### 3. Buscar produto por ID
+```http
+GET /api/products/65f4b1234567890abcdef123
+```
+**Resposta:**
+```json
+{
+  "_id": "65f4b1234567890abcdef123",
+  "title": "Smartphone Samsung Galaxy S24",
+  "description": "Smartphone Android com 128GB de armazenamento",
+  "code": "SMART001",
+  "price": 2999.99,
+  "status": true,
+  "stock": 25,
+  "category": "smartphones",
+  "thumbnails": ["samsung_s24_front.jpg"],
+  "createdAt": "2024-01-15T10:30:00.000Z",
+  "updatedAt": "2024-01-15T10:30:00.000Z"
+}
+```
+
+### 4. Criar novo produto
+```http
+POST /api/products
+Content-Type: application/json
+
+{
+  "title": "Notebook Gamer Alienware",
+  "description": "Notebook para jogos com RTX 4060",
+  "code": "ALIEN001",
+  "price": 8999.99,
+  "status": true,
+  "stock": 10,
+  "category": "notebooks",
+  "thumbnails": ["alienware_1.jpg", "alienware_2.jpg"]
+}
+```
+**Resposta:**
+```json
+{
+  "message": "Produto criado com sucesso",
+  "product": {
+    "_id": "65f4b9876543210abcdef456",
+    "title": "Notebook Gamer Alienware",
+    "description": "Notebook para jogos com RTX 4060",
+    "code": "ALIEN001",
+    "price": 8999.99,
+    "status": true,
+    "stock": 10,
+    "category": "notebooks",
+    "thumbnails": ["alienware_1.jpg", "alienware_2.jpg"],
+    "createdAt": "2024-01-15T11:00:00.000Z",
+    "updatedAt": "2024-01-15T11:00:00.000Z"
   }
-  ```
+}
+```
 
-### 4. Atualizar produto
-- **Método:** `PUT`
-- **URL:** `http://localhost:8080/api/products/1`
-- **Headers:**
-  - `Content-Type`: `application/json`
-- **Body** (selecione `raw` e `JSON`):
-  ```json
-  {
-    "price": 2799.99,
-    "stock": 20
+### 5. Atualizar produto
+```http
+PUT /api/products/65f4b9876543210abcdef456
+Content-Type: application/json
+
+{
+  "price": 7999.99,
+  "stock": 15
+}
+```
+**Resposta:**
+```json
+{
+  "message": "Produto atualizado com sucesso",
+  "product": {
+    "_id": "65f4b9876543210abcdef456",
+    "title": "Notebook Gamer Alienware",
+    "price": 7999.99,
+    "stock": 15
   }
-  ```
+}
+```
 
-### 5. Deletar produto
-- **Método:** `DELETE`
-- **URL:** `http://localhost:8080/api/products/10`
+### 6. Deletar produto
+```http
+DELETE /api/products/65f4b9876543210abcdef456
+```
+**Resposta:**
+```json
+{
+  "message": "Produto deletado com sucesso",
+  "product": {
+    "_id": "65f4b9876543210abcdef456",
+    "title": "Notebook Gamer Alienware"
+  }
+}
+```
 
 ## Carrinhos
 
 ### 1. Listar todos os carrinhos
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/carts`
+```http
+GET /api/carts
+```
+**Resposta:**
+```json
+[
+  {
+    "_id": "65f4c1234567890abcdef789",
+    "products": [
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef123",
+          "title": "Smartphone Samsung Galaxy S24",
+          "price": 2999.99,
+          "category": "smartphones"
+        },
+        "quantity": 2
+      }
+    ],
+    "createdAt": "2024-01-15T12:00:00.000Z",
+    "updatedAt": "2024-01-15T12:30:00.000Z"
+  }
+]
+```
 
 ### 2. Criar novo carrinho
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts`
+```http
+POST /api/carts
+```
+**Resposta:**
+```json
+{
+  "message": "Carrinho criado com sucesso",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": [],
+    "createdAt": "2024-01-15T13:00:00.000Z",
+    "updatedAt": "2024-01-15T13:00:00.000Z"
+  }
+}
+```
 
-### 3. Listar produtos do carrinho
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/carts/1`
+### 3. Buscar carrinho por ID (com populate)
+```http
+GET /api/carts/65f4c1234567890abcdef789
+```
+**Resposta:**
+```json
+{
+  "_id": "65f4c1234567890abcdef789",
+  "products": [
+    {
+      "product": {
+        "_id": "65f4b1234567890abcdef123",
+        "title": "Smartphone Samsung Galaxy S24",
+        "description": "Smartphone Android com 128GB de armazenamento",
+        "code": "SMART001",
+        "price": 2999.99,
+        "status": true,
+        "stock": 25,
+        "category": "smartphones",
+        "thumbnails": ["samsung_s24_front.jpg"]
+      },
+      "quantity": 2
+    }
+  ],
+  "createdAt": "2024-01-15T12:00:00.000Z",
+  "updatedAt": "2024-01-15T12:30:00.000Z"
+}
+```
 
 ### 4. Adicionar produto ao carrinho
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts/1/product/1`
-- **Headers:**
-  - `Content-Type`: `application/json`
-- **Body** (selecione `raw` e `JSON`):
-  ```json
-  {
-    "quantity": 3
+```http
+POST /api/carts/65f4c9876543210abcdef012/product/65f4b1234567890abcdef123
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+```
+**Resposta:**
+```json
+{
+  "message": "Produto adicionado ao carrinho com sucesso",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": [
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef123",
+          "title": "Smartphone Samsung Galaxy S24",
+          "price": 2999.99
+        },
+        "quantity": 3
+      }
+    ]
   }
-  ```
+}
+```
 
-### 5. Adicionar outro produto ao carrinho
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts/1/product/3`
-- **Headers:**
-  - `Content-Type`: `application/json`
-- **Body** (selecione `raw` e `JSON`):
-  ```json
-  {
-    "quantity": 1
+### 5. Atualizar quantidade de produto no carrinho
+```http
+PUT /api/carts/65f4c9876543210abcdef012/products/65f4b1234567890abcdef123
+Content-Type: application/json
+
+{
+  "quantity": 5
+}
+```
+**Resposta:**
+```json
+{
+  "message": "Quantidade atualizada com sucesso",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": [
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef123",
+          "title": "Smartphone Samsung Galaxy S24"
+        },
+        "quantity": 5
+      }
+    ]
   }
-  ```
+}
+```
 
-### 6. Atualizar quantidade de produto no carrinho
-- **Método:** `PUT`
-- **URL:** `http://localhost:8080/api/carts/1/product/1`
-- **Headers:**
-  - `Content-Type`: `application/json`
-- **Body** (selecione `raw` e `JSON`):
-  ```json
-  {
-    "quantity": 5
+### 6. Atualizar carrinho completo
+```http
+PUT /api/carts/65f4c9876543210abcdef012
+Content-Type: application/json
+
+{
+  "products": [
+    {
+      "product": "65f4b1234567890abcdef123",
+      "quantity": 2
+    },
+    {
+      "product": "65f4b1234567890abcdef124",
+      "quantity": 1
+    }
+  ]
+}
+```
+**Resposta:**
+```json
+{
+  "message": "Carrinho atualizado com sucesso",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": [
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef123",
+          "title": "Smartphone Samsung Galaxy S24",
+          "price": 2999.99
+        },
+        "quantity": 2
+      },
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef124",
+          "title": "Notebook Dell Inspiron 15",
+          "price": 3599.90
+        },
+        "quantity": 1
+      }
+    ]
   }
-  ```
+}
+```
 
-### 7. Remover produto do carrinho
-- **Método:** `DELETE`
-- **URL:** `http://localhost:8080/api/carts/1/product/3`
-
-### 8. Deletar carrinho vazio
-- **Método:** `DELETE`
-- **URL:** `http://localhost:8080/api/carts/1`
-- **Observação:** Só funciona se o carrinho estiver vazio (sem produtos)
-
-## Fluxo Completo de Teste
-
-Para executar um fluxo contínuo, você pode usar variáveis de ambiente no Postman/Insomnia.
-
-### 0. Visualizar carrinhos existentes (opcional)
-- Execute a requisição para listar todos os carrinhos:
-  - **Método:** `GET`
-  - **URL:** `http://localhost:8080/api/carts`
-
-### 1. Criar um carrinho
-- Execute a requisição para criar um novo carrinho:
-  - **Método:** `POST`
-  - **URL:** `http://localhost:8080/api/carts`
-- Na resposta, copie o valor do `id` do carrinho.
-- Crie uma variável de ambiente (ex: `CART_ID`) e cole o ID copiado.
-
-### 2. Adicionar produtos ao carrinho
-- Agora, use a variável `CART_ID` nas URLs das próximas requisições. A sintaxe pode variar (ex: `{{CART_ID}}` no Postman ou `_.CART_ID` no Insomnia).
-
-- **Adicionar Samsung Galaxy S24:**
-  - **Método:** `POST`
-  - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/1`
-  - **Headers:** `Content-Type`: `application/json`
-  - **Body** (raw/JSON):
-    ```json
-    { "quantity": 2 }
-    ```
-
-- **Adicionar Fone Sony:**
-  - **Método:** `POST`
-  - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/3`
-  - **Headers:** `Content-Type`: `application/json`
-  - **Body** (raw/JSON):
-    ```json
-    { "quantity": 1 }
-    ```
-
-### 3. Atualizar quantidade de um produto
-- **Método:** `PUT`
-- **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/1`
-- **Headers:** `Content-Type`: `application/json`
-- **Body** (raw/JSON):
-  ```json
-  { "quantity": 3 }
-  ```
-- **Observação:** Define a quantidade do Samsung Galaxy S24 para 3 unidades
-
-### 4. Visualizar carrinho atualizado
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/carts/{{CART_ID}}`
-
-### 5. Remover todos os produtos e deletar carrinho
-- **Remover Samsung Galaxy S24:**
-  - **Método:** `DELETE`
-  - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/1`
-
-- **Remover Fone Sony:**
-  - **Método:** `DELETE`
-  - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}/product/3`
-
-- **Deletar carrinho vazio:**
-  - **Método:** `DELETE`
-  - **URL:** `http://localhost:8080/api/carts/{{CART_ID}}`
-
-## Testes de Validação
-
-### 1. Tentar criar produto com campos faltando
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/products`
-- **Headers:** `Content-Type`: `application/json`
-- **Body** (raw/JSON):
-  ```json
-  {
-    "title": "Produto Incompleto"
+### 7. Remover produto específico do carrinho
+```http
+DELETE /api/carts/65f4c9876543210abcdef012/products/65f4b1234567890abcdef123
+```
+**Resposta:**
+```json
+{
+  "message": "Produto removido do carrinho com sucesso",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": [
+      {
+        "product": {
+          "_id": "65f4b1234567890abcdef124",
+          "title": "Notebook Dell Inspiron 15"
+        },
+        "quantity": 1
+      }
+    ]
   }
-  ```
+}
+```
 
-### 2. Tentar buscar produto inexistente
-- **Método:** `GET`
-- **URL:** `http://localhost:8080/api/products/999`
+### 8. Limpar carrinho (remover todos os produtos)
+```http
+DELETE /api/carts/65f4c9876543210abcdef012
+```
+**Resposta:**
+```json
+{
+  "message": "Todos os produtos foram removidos do carrinho",
+  "cart": {
+    "_id": "65f4c9876543210abcdef012",
+    "products": []
+  }
+}
+```
 
-### 3. Tentar adicionar produto a carrinho inexistente
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts/999/product/1`
-- **Headers:** `Content-Type`: `application/json`
-- **Body** (raw/JSON):
-  ```json
-  { "quantity": 1 }
-  ```
+## Filtros Avançados de Produtos
 
-### 4. Tentar adicionar produto inexistente ao carrinho
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts/1/product/999`
-- **Headers:** `Content-Type`: `application/json`
-- **Body** (raw/JSON):
-  ```json
-  { "quantity": 1 }
-  ```
+### Produtos disponíveis
+```http
+GET /api/products?query=available
+```
 
-### 5. Tentar adicionar mais produtos do que o estoque (PlayStation 5 tem estoque 0)
-- **Método:** `POST`
-- **URL:** `http://localhost:8080/api/carts/1/product/10`
-- **Headers:** `Content-Type`: `application/json`
-- **Body** (raw/JSON):
-  ```json
-  { "quantity": 1 }
-  ```
+### Produtos indisponíveis
+```http
+GET /api/products?query=unavailable
+```
 
-### 6. Tentar remover produto que não existe no carrinho
-- **Método:** `DELETE`
-- **URL:** `http://localhost:8080/api/carts/1/product/999`
+### Produtos por categoria
+```http
+GET /api/products?query=smartphones
+```
 
-### 7. Tentar deletar carrinho que ainda tem produtos
-- **Método:** `DELETE`
-- **URL:** `http://localhost:8080/api/carts/1`
-- **Observação:** Deve retornar erro se o carrinho não estiver vazio
+### Produtos ordenados por preço (crescente)
+```http
+GET /api/products?sort=asc
+```
 
-## Produtos Disponíveis para Teste
+### Produtos ordenados por preço (decrescente)
+```http
+GET /api/products?sort=desc
+```
 
-- ID 1: Smartphone Samsung Galaxy S24 (R$ 2.999,99) - Estoque: 25
-- ID 2: Notebook Dell Inspiron 15 (R$ 3.599,90) - Estoque: 15
-- ID 3: Fone de Ouvido Sony WH-1000XM5 (R$ 1.299,99) - Estoque: 40
-- ID 4: Smart TV LG 55 4K UHD (R$ 2.499,00) - Estoque: 8
-- ID 5: Mouse Gamer Logitech G Pro X (R$ 299,90) - Estoque: 60
-- ID 6: Tablet iPad Air 5ª geração (R$ 4.199,00) - Estoque: 12
-- ID 7: Teclado Mecânico Keychron K2 (R$ 459,99) - Estoque: 35
-- ID 8: Câmera DSLR Canon EOS Rebel T7 (R$ 2.199,00) - Estoque: 6
-- ID 9: Smartwatch Apple Watch Series 9 (R$ 1.999,00) - Estoque: 20
-- ID 10: Console PlayStation 5 (R$ 3.999,99) - **SEM ESTOQUE** (status: false)
+### Combinação de filtros
+```http
+GET /api/products?limit=5&page=2&sort=desc&query=available
+```
+
+## Views (Interface Web)
+
+### Página inicial
+```http
+GET /
+```
+
+### Catálogo de produtos com paginação
+```http
+GET /products?limit=10&page=1&sort=asc&query=smartphones
+```
+
+### Detalhes de um produto
+```http
+GET /products/65f4b1234567890abcdef123
+```
+
+### Visualizar carrinho
+```http
+GET /carts/65f4c1234567890abcdef789
+```
+
+### Interface de administração em tempo real
+```http
+GET /realtimeproducts
+```
+
+## Códigos de Status HTTP
+
+- **200** - Sucesso
+- **201** - Criado com sucesso
+- **400** - Dados inválidos
+- **404** - Recurso não encontrado
+- **500** - Erro interno do servidor
+
+## Estrutura de Erro Padrão
+
+```json
+{
+  "error": "Mensagem de erro descritiva"
+}
+```

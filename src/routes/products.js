@@ -4,17 +4,37 @@ const ProductManager = require('../managers/ProductManager.js');
 const router = express.Router();
 const productManager = new ProductManager();
 
-// GET / - Listar todos os produtos
-router.get('/', async (req, res) => {
+router.get('/categories', async (req, res) => {
     try {
-        const products = await productManager.getProducts();
-        res.json(products);
+        const categories = await productManager.getCategories();
+        res.json(categories);
     } catch (error) {
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// GET /:pid - Buscar produto por ID
+router.get('/', async (req, res) => {
+    try {
+        const { limit, page, sort, query } = req.query;
+        
+        const options = {
+            limit: limit ? parseInt(limit) : 10,
+            page: page ? parseInt(page) : 1,
+            sort,
+            query
+        };
+
+        const result = await productManager.getProducts(options);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ 
+            status: 'error',
+            payload: [],
+            message: 'Erro interno do servidor' 
+        });
+    }
+});
+
 router.get('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -30,7 +50,6 @@ router.get('/:pid', async (req, res) => {
     }
 });
 
-// POST / - Adicionar novo produto
 router.post('/', async (req, res) => {
     try {
         const { title, description, code, price, status, stock, category, thumbnails } = req.body;
@@ -59,7 +78,6 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /:pid - Atualizar produto
 router.put('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;
@@ -80,7 +98,6 @@ router.put('/:pid', async (req, res) => {
     }
 });
 
-// DELETE /:pid - Deletar produto
 router.delete('/:pid', async (req, res) => {
     try {
         const { pid } = req.params;

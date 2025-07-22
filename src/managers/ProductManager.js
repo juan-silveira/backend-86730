@@ -1,110 +1,172 @@
-const fs = require('fs').promises;
-const path = require('path');
+const productModel = require('../models/product.model.js');
 
 class ProductManager {
-    constructor() {
-        this.path = path.join(__dirname, '../data/products.json');
-        this.initializeFile();
-    }
-
-    async initializeFile() {
+    async getCategories() {
         try {
-            await fs.access(this.path);
+            const categories = await productModel.distinct('category');
+            return categories.sort();
         } catch (error) {
-            // Se o arquivo não existe, cria a pasta data e o arquivo
-            const dataDir = path.dirname(this.path);
-            await fs.mkdir(dataDir, { recursive: true });
-            await fs.writeFile(this.path, JSON.stringify([]));
-        }
-    }
-
-    async getProducts() {
-        try {
-            const data = await fs.readFile(this.path, 'utf-8');
-            return JSON.parse(data);
-        } catch (error) {
-            console.error('Erro ao ler produtos:', error);
+            console.error('Erro ao buscar categorias:', error);
             return [];
         }
     }
 
-    async saveProducts(products) {
+    async getProducts(options = {}) {
         try {
-            await fs.writeFile(this.path, JSON.stringify(products, null, 2));
+            const {
+                limit = 10,
+                page = 1,
+                sort,
+                query
+            } = options;
+
+            const filter = {};
+            
+            if (query) {
+                if (query === 'available') {
+                    filter.status = true;
+                    filter.stock = { $gt: 0 };
+                } else if (query === 'unavailable') {
+                    filter.$or = [
+                        { status: false },
+                        { stock: { $lte: 0 } }
+                    ];
+                } else {
+                    filter.category = { $regex: query, $options: 'i' };
+                }
+            }
+
+            const sortOptions = {};
+            if (sort) {
+                if (sort === 'asc') {
+                    sortOptions.price = 1;
+                } else if (sort === 'desc') {
+                    sortOptions.price = -1;
+                }
+            }
+
+            const result = await productModel.paginate(filter, {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                sort: sortOptions,
+                lean: true
+            });
+
+            const baseUrl = '/api/products';
+            const buildLink = (pageNum) => {
+                if (!pageNum) return null;
+                const params = new URLSearchParams();
+                params.append('page', pageNum);
+                params.append('limit', limit);
+                if (sort) params.append('sort', sort);
+                if (query) params.append('query', query);
+                return `${baseUrl}?${params.toString()}`;
+            };
+
+            return {
+                status: 'success',
+                payload: result.docs,
+                totalPages: result.totalPages,
+                prevPage: result.prevPage,
+                nextPage: result.nextPage,
+                page: result.page,
+                hasPrevPage: result.hasPrevPage,
+                hasNextPage: result.hasNextPage,
+                prevLink: buildLink(result.prevPage),
+                nextLink: buildLink(result.nextPage)
+            };
         } catch (error) {
-            console.error('Erro ao salvar produtos:', error);
-            throw error;
+            console.error('Erro ao buscar produtos:', error);
+            return {
+                status: 'error',
+                payload: [],
+                totalPages: 0,
+                prevPage: null,
+                nextPage: null,
+                page: 1,
+                hasPrevPage: false,
+                hasNextPage: false,
+                prevLink: null,
+                nextLink: null
+            };
         }
     }
 
     async addProduct(product) {
-        // Validação dos campos obrigatórios
-        const { title, description, code, price, status = true, stock, category, thumbnails = [] } = product;
-        
-        if (!title || !description || !code || price === undefined || stock === undefined || !category) {
-            throw new Error('Todos os campos obrigatórios devem ser preenchidos');
+        try {
+            const { title, description, code, price, status = true, stock, category, thumbnails = [] } = product;
+            
+            if (!title || !description || !code || price === undefined || stock === undefined || !category) {
+                throw new Error('Todos os campos obrigatórios devem ser preenchidos');
+            }
+
+            const existingProduct = await productModel.findOne({ code });
+            if (existingProduct) {
+                throw new Error('Produto com este código já existe');
+            }
+
+            const newProduct = new productModel({
+                title,
+                description,
+                code,
+                price: Number(price),
+                status: Boolean(status),
+                stock: Number(stock),
+                category,
+                thumbnails: Array.isArray(thumbnails) ? thumbnails : []
+            });
+
+            await newProduct.save();
+            return newProduct;
+        } catch (error) {
+            console.error('Erro ao adicionar produto:', error);
+            throw error;
         }
-
-        const products = await this.getProducts();
-        
-        // Verifica se o código já existe
-        const existingProduct = products.find(p => p.code === code);
-        if (existingProduct) {
-            throw new Error('Produto com este código já existe');
-        }
-
-        // Lógica para criar ID incremental
-        const nextId = products.length === 0 ? 1 : products.at(-1).id + 1;
-        
-        const newProduct = {
-            id: nextId,
-            title,
-            description,
-            code,
-            price: Number(price),
-            status: Boolean(status),
-            stock: Number(stock),
-            category,
-            thumbnails: Array.isArray(thumbnails) ? thumbnails : []
-        };
-
-        products.push(newProduct);
-        await this.saveProducts(products);
-        return newProduct;
     }
 
     async getProductById(id) {
-        const products = await this.getProducts();
-        return products.find(product => product.id == id); // Comparação flexível para aceitar string e number
+        try {
+            return await productModel.findById(id);
+        } catch (error) {
+            console.error('Erro ao buscar produto por ID:', error);
+            return null;
+        }
     }
 
     async updateProduct(id, updates) {
-        const products = await this.getProducts();
-        const productIndex = products.findIndex(product => product.id == id); // Comparação flexível
-        
-        if (productIndex === -1) {
-            throw new Error('Produto não encontrado');
+        try {
+            const { id: _, ...validUpdates } = updates;
+            
+            const updatedProduct = await productModel.findByIdAndUpdate(
+                id,
+                validUpdates,
+                { new: true, runValidators: true }
+            );
+            
+            if (!updatedProduct) {
+                throw new Error('Produto não encontrado');
+            }
+            
+            return updatedProduct;
+        } catch (error) {
+            console.error('Erro ao atualizar produto:', error);
+            throw error;
         }
-
-        // Remove o id dos updates para garantir que não seja alterado
-        const { id: _, ...validUpdates } = updates;
-        
-        products[productIndex] = { ...products[productIndex], ...validUpdates };
-        await this.saveProducts(products);
-        return products[productIndex];
     }
 
     async deleteProduct(id) {
-        const products = await this.getProducts();
-        const productIndex = products.findIndex(product => product.id == id); // Comparação flexível
-        
-        if (productIndex === -1) {
-            throw new Error('Produto não encontrado');
+        try {
+            const deletedProduct = await productModel.findByIdAndDelete(id);
+            
+            if (!deletedProduct) {
+                throw new Error('Produto não encontrado');
+            }
+            
+            return deletedProduct;
+        } catch (error) {
+            console.error('Erro ao deletar produto:', error);
+            throw error;
         }
-
-        const deletedProduct = products.splice(productIndex, 1)[0];
-        await this.saveProducts(products);
-        return deletedProduct;
     }
 }
 

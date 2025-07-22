@@ -1,0 +1,193 @@
+<main class="container">
+    <h1 class="mb-4">Catálogo de Produtos</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form method="GET" action="/products" class="row g-3">
+                <div class="col-md-3">
+                    <label for="limit" class="form-label">Produtos por página</label>
+                    <select name="limit" id="limit" class="form-select">
+                        <option value="5" {{#if (eq filters.limit "5")}}selected{{/if}}>5</option>
+                        <option value="10" {{#if (eq filters.limit "10")}}selected{{/if}}>10</option>
+                        <option value="20" {{#if (eq filters.limit "20")}}selected{{/if}}>20</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="sort" class="form-label">Ordenar por preço</label>
+                    <select name="sort" id="sort" class="form-select">
+                        <option value="">Sem ordenação</option>
+                        <option value="asc" {{#if (eq filters.sort "asc")}}selected{{/if}}>Menor para maior</option>
+                        <option value="desc" {{#if (eq filters.sort "desc")}}selected{{/if}}>Maior para menor</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="query" class="form-label">Filtrar</label>
+                    <select name="query" id="query" class="form-select">
+                        <option value="">Todos os produtos</option>
+                        <option value="available" {{#if (eq filters.query "available")}}selected{{/if}}>Disponíveis</option>
+                        <option value="unavailable" {{#if (eq filters.query "unavailable")}}selected{{/if}}>Indisponíveis</option>
+                        {{#each categories}}
+                        <option value="{{this}}" {{#if (eq this ../filters.query)}}selected{{/if}}>{{this}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {{#if products.length}}
+        {{#each products}}
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+            <div class="card h-100">
+                <div class="card-header pt-3">
+                    <h6>{{this.title}}</h6>
+                    <small class="text-muted">Categoria: {{this.category}}</small>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{this.description}}</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-success">R$ {{this.price}}</strong>
+                        <span class="badge {{#if this.status}}bg-success{{else}}bg-danger{{/if}}">
+                            {{#if this.status}}Disponível{{else}}Indisponível{{/if}}
+                        </span>
+                    </div>
+                    <small class="text-muted">Estoque: {{this.stock}} unidades</small>
+                </div>
+                <div class="card-footer">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="/products/{{this._id}}" class="btn btn-outline-primary btn-sm w-100">Ver Detalhes</a>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-success btn-sm w-100" 
+                                onclick="addToCart('{{this._id}}')">
+                                Adicionar ao Carrinho
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+        {{else}}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h4>Nenhum produto encontrado</h4>
+                <p>Tente ajustar os filtros ou remover as restrições de busca.</p>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+
+    {{#if pagination.totalPages}}
+    <nav aria-label="Navegação de produtos" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {{#if pagination.hasPrevPage}}
+            <li class="page-item">
+                <a class="page-link" href="?limit={{filters.limit}}&page={{pagination.prevPage}}{{#if filters.sort}}&sort={{filters.sort}}{{/if}}{{#if filters.query}}&query={{filters.query}}{{/if}}">
+                    Anterior
+                </a>
+            </li>
+            {{else}}
+            <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+            </li>
+            {{/if}}
+
+            {{#each (range 1 pagination.totalPages)}}
+            <li class="page-item {{#if (eq this ../pagination.currentPage)}}active{{/if}}">
+                <a class="page-link" href="?limit={{../filters.limit}}&page={{this}}{{#if ../filters.sort}}&sort={{../filters.sort}}{{/if}}{{#if ../filters.query}}&query={{../filters.query}}{{/if}}">
+                    {{this}}
+                </a>
+            </li>
+            {{/each}}
+
+            {{#if pagination.hasNextPage}}
+            <li class="page-item">
+                <a class="page-link" href="?limit={{filters.limit}}&page={{pagination.nextPage}}{{#if filters.sort}}&sort={{filters.sort}}{{/if}}{{#if filters.query}}&query={{filters.query}}{{/if}}">
+                    Próxima
+                </a>
+            </li>
+            {{else}}
+            <li class="page-item disabled">
+                <span class="page-link">Próxima</span>
+            </li>
+            {{/if}}
+        </ul>
+    </nav>
+    
+    <div class="text-center mt-3">
+        <small class="text-muted">
+            Página {{pagination.currentPage}} de {{pagination.totalPages}}
+        </small>
+    </div>
+    {{/if}}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
+
+async function addToCart(productId) {
+    let cartId = localStorage.getItem('cartId');
+    
+    if (!cartId) {
+        try {
+            const response = await fetch('/api/carts', { method: 'POST' });
+            const data = await response.json();
+            cartId = data.cart._id;
+            localStorage.setItem('cartId', cartId);
+        } catch (error) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Erro ao criar carrinho'
+            });
+            return;
+        }
+    }
+    
+    try {
+        const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            Toast.fire({
+                icon: 'success',
+                title: 'Produto adicionado ao carrinho!'
+            });
+        } else {
+            Toast.fire({
+                icon: 'error',
+                title: data.error || 'Erro ao adicionar produto'
+            });
+        }
+    } catch (error) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Erro ao conectar com o servidor'
+        });
+    }
+}
+</script> 
